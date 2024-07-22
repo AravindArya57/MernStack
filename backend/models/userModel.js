@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, 'Please enter password'],
+        minLength:[4, 'Password minimum 4 characters'],
         maxlength: [6, 'Password cannot exceed 6 characters'],
         select: false
     },
@@ -36,12 +37,21 @@ const userSchema = new mongoose.Schema({
     }
 })
 
-userSchema.pre('save', async function (next){
-    if(!this.isModified('password')){
-        next();
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+    if (!this.isModified('password')) {
+      return next();
     }
-    this.password  = await bcrypt.hash(this.password, 10)
-})
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
+  });
+
+// userSchema.pre('save', async function (next){
+//     if(!this.isModified('password')){
+//         next();
+//     }
+//     this.password  = await bcrypt.hash(this.password, 10)
+// })
 
 userSchema.methods.getJwtToken = function(){
    return jwt.sign({id: this.id}, process.env.JWT_SECRET, {
@@ -50,7 +60,7 @@ userSchema.methods.getJwtToken = function(){
 }
 
 userSchema.methods.isValidPassword = async function(enteredPassword){
-    return  bcrypt.compare(enteredPassword, this.password)
+    return await bcrypt.compare(enteredPassword, this.password)
 }
 
 userSchema.methods.getResetToken = function(){
