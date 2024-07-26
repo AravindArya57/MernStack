@@ -6,8 +6,26 @@ const uploadVideo = async (req, res) => {
   const { title, description, videoMode } = req.body;
   const videoFile = req.files.video[0];
 
+  var filePathSet;
+  switch(videoMode) {
+    case '2D':
+      filePathSet = `uploads/videos/2D/${videoFile.filename}`;
+      break;
+    case '180':
+      filePathSet = `uploads/videos/180/${videoFile.filename}`;
+      break;
+    case '360':
+      filePathSet = `uploads/videos/360/${videoFile.filename}`;
+      break;
+    case 'theater':
+      filePathSet = `uploads/videos/theater/${videoFile.filename}`;
+      break;
+    default:
+      filePathSet = `uploads/videos/${videoFile.filename}`;
+  }
+
   // Create upload paths
-  const videoFilePath = `uploads/videos/${videoFile.filename}` // videoFile.path;
+  const videoFilePath = filePathSet // videoFile.path;
 
   // Save video info to database
   const newVideo = new FileModel_S({
