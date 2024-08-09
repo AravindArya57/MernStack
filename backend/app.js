@@ -7,9 +7,13 @@ const dotenv = require('dotenv');
 dotenv.config({path:path.join(__dirname,"config/config.env")});
 const cors = require('cors');
 
-
 // Enable CORS for all routes
 app.use(cors());
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json());
 app.use(cookieParser());
