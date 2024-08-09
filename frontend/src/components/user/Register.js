@@ -3,6 +3,7 @@ import {useDispatch, useSelector } from 'react-redux'
 import { register, clearAuthError } from '../../actions/userActions'
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import MetaData from '../layouts/MetaData';
 
 export default function Register() {
     const [userData, setUserData] = useState({
@@ -45,7 +46,7 @@ export default function Register() {
 
     useEffect(()=>{
         if(isAuthenticated) {
-            navigate('/');
+            navigate('/login');
             return
         }
         if(error)  {
@@ -59,6 +60,8 @@ export default function Register() {
     },[error, isAuthenticated, dispatch, navigate])
 
     return (
+        <>
+        <MetaData title={`Register`} />
         <div className="row wrapper">
             <div className="col-10 col-lg-5">
             <form onSubmit={submitHandler} className="shadow-lg" encType='multipart/form-data'>
@@ -131,5 +134,6 @@ export default function Register() {
             </form>
             </div>
         </div>
+    </>
     )
 }

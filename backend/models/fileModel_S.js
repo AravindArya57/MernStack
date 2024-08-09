@@ -11,6 +11,10 @@ const FileModel_S_Schema = new Schema({
     type: String,
     required: true
   },
+  device : {
+    type : String,
+    required : true
+  },
   videoMode: {
     type: String,
     required: true
@@ -19,7 +23,7 @@ const FileModel_S_Schema = new Schema({
     type: String,
     required: true
   },
-  videoFilePath: {
+  thumbnail: {
     type: String,
     required: true
   },

@@ -3,16 +3,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { clearAuthError, login } from '../../actions/userActions';
 import MetaData from '../layouts/MetaData';
 import { toast } from 'react-toastify';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // useLocation
+
  export default function Login() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const location = useLocation();
+    // const location = useLocation();
 
     const { loading, error, isAuthenticated } = useSelector(state => state.authState)
-    const redirect = location.search?'/'+location.search.split('=')[1]:'/';
+    // const redirect = location.search?'/'+location.search.split('=')[1]:'/';
 
     const  submitHandler = (e) => {
         e.preventDefault();
@@ -21,7 +22,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
     useEffect(() => {
         if(isAuthenticated) {
-            navigate(redirect)
+            navigate('/admin/dashboard') // redirect
         }
 
         if(error)  {

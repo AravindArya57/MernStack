@@ -1,113 +1,93 @@
-import Sidebar from "./Sidebar";
-import {useDispatch, useSelector} from 'react-redux';
-import { useEffect } from "react";
-import { getAdminProducts } from "../../actions/productActions";
-import {getUsers} from '../../actions/userActions'
-import {adminOrders as adminOrdersAction} from '../../actions/orderActions'
-import { Link } from "react-router-dom";
+// import Sidebar from "./Sidebar";
+import React, { useEffect } from 'react';
+import { Image } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchVideos, deleteVideo, clearErrors } from '../../slices/videoSlice';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Dashboard () {
-    const { products = [] } = useSelector( state => state.productsState);
-    const { adminOrders = [] } = useSelector( state => state.orderState);
-    const { users = [] } = useSelector( state => state.userState);
     const dispatch = useDispatch();
-    let outOfStock = 0;
+    const { videos, error, isDeleted, loading } = useSelector(state => state.videos);
 
-    if (products.length > 0) {
-        products.forEach( product => {
-            if( product.stock === 0  ) {
-                outOfStock = outOfStock + 1;
-            }
-        })
-    }
+    useEffect(() => {
+        dispatch(fetchVideos());
 
-    let totalAmount = 0;
-    if (adminOrders.length > 0) {
-        adminOrders.forEach( order => {
-            totalAmount += order.totalPrice
-        })
-    }
+        if (error) {
+            toast(error, {
+                position: toast.POSITION.BOTTOM_CENTER,
+                type: 'error',
+                onOpen: ()=> { dispatch(clearErrors()) }
+            })
+            return;
+        }
+        
+        if (isDeleted) {
+            toast('Video deleted successfully!',{
+                type: 'success',
+                position: toast.POSITION.BOTTOM_CENTER
+            })
+            return;
+        }
+    }, [dispatch, error, isDeleted]);
 
-
-
-    useEffect( () => {
-       dispatch(getAdminProducts);
-       dispatch(getUsers);
-       dispatch(adminOrdersAction)
-    }, [])
-
-
+    const handleDelete = (id) => {
+        if (window.confirm('Are you sure you want to delete this video?')) {
+            dispatch(deleteVideo(id));
+        }
+    };
     return (
         <div className="row">
-            <div className="col-12 col-md-2">
-                    <Sidebar/>
-            </div>
+            {/* <div className="col-12 col-md-2">
+                <Sidebar/>
+            </div> */}
             <div className="col-12 col-md-10">
-                <h1 className="my-4">Dashboard</h1>
-                <div className="row pr-4">
-                    <div className="col-xl-12 col-sm-12 mb-3">
-                        <div className="card text-white bg-primary o-hidden h-100">
-                            <div className="card-body">
-                                <div className="text-center card-font-size">Total Amount<br /> <b>${totalAmount}</b>
+            <main className='main-container'>
+                <div className="container mt-5">
+                    <h1 className="mb-4 text-dark" >My Content</h1>
+                    {loading ? (
+                        <p>Loading...</p>
+                    ) : (
+                        <div className="row">
+                            {videos.map(video => (
+                                <div key={video._id} className="col-md-3">
+                                    <div className="card bg-dark rounded text-white">
+                                        <Image className="card-img thumbnail" src={video.thumbnail} alt="Card image" />
+                                        <div className="card-img-overlay">
+                                            <div >
+                                                <div className='row'>
+                                                    <div className='col'>
+                                                        <p className="card-text">{video.title}</p>
+                                                    </div>
+                                                    <div className='col'>
+                                                        <span className="badge badge-light text-dark">{video.device}</span>
+                                                    </div>
+                                                </div>
+                                                <div className='row'>
+                                                    <div className='col'>
+                                                        <p className="card-text">{video.description}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="btn-group">
+                                                    <Link to={`/admin/video/update/${video._id}`} className="btn bg-light">Edit</Link>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-secondary text-light text-right"
+                                                        onClick={() => handleDelete(video._id)}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            ))}
                         </div>
-                    </div>
+                    )}
                 </div>
-                <div className="row pr-4">
-                    <div className="col-xl-3 col-sm-6 mb-3">
-                        <div className="card text-white bg-success o-hidden h-100">
-                            <div className="card-body">
-                                <div className="text-center card-font-size">Products<br /> <b>{products.length}</b></div>
-                            </div>
-                            <Link className="card-footer text-white clearfix small z-1" to="/admin/products">
-                                <span className="float-left">View Details</span>
-                                <span className="float-right">
-                                    <i className="fa fa-angle-right"></i>
-                                </span>
-                            </Link>
-                        </div>
-                    </div>
-
-
-                    <div className="col-xl-3 col-sm-6 mb-3">
-                        <div className="card text-white bg-danger o-hidden h-100">
-                            <div className="card-body">
-                                <div className="text-center card-font-size">Orders<br /> <b>{adminOrders.length}</b></div>
-                            </div>
-                            <Link className="card-footer text-white clearfix small z-1" to="/admin/orders">
-                                <span className="float-left">View Details</span>
-                                <span className="float-right">
-                                    <i className="fa fa-angle-right"></i>
-                                </span>
-                            </Link>
-                        </div>
-                    </div>
-
-
-                    <div className="col-xl-3 col-sm-6 mb-3">
-                        <div className="card text-white bg-info o-hidden h-100">
-                            <div className="card-body">
-                                <div className="text-center card-font-size">Users<br /> <b>{users.length}</b></div>
-                            </div>
-                            <Link className="card-footer text-white clearfix small z-1" to="/admin/users">
-                                <span className="float-left">View Details</span>
-                                <span className="float-right">
-                                    <i className="fa fa-angle-right"></i>
-                                </span>
-                            </Link>
-                        </div>
-                    </div>
-
-
-                    <div className="col-xl-3 col-sm-6 mb-3">
-                        <div className="card text-white bg-warning o-hidden h-100">
-                            <div className="card-body">
-                                <div className="text-center card-font-size">Out of Stock<br /> <b>{outOfStock}</b></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </main>
             </div>
         </div>
     )
