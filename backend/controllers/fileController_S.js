@@ -3,10 +3,12 @@ const path = require('path');
 const fs = require('fs');
 
 const uploadVideo = async (req, res) => {
-  const { title, description, device, videoMode } = req.body;
-  const videoFile = path.posix.join('/', req.files['video'][0].path).replace(/\\/g, '/');
-  const thumbnailPath = path.posix.join('/', req.files['thumbnail'][0].path).replace(/\\/g, '/');
-  
+  const { title, description, videoMode } = req.body;
+  const videoFile = req.files.video[0];
+
+  // Create upload paths
+  const videoFilePath = `uploads/videos/${videoFile.filename}` // videoFile.path;
+
   // Save video info to database
   const newVideo = new FileModel_S({
     title,
