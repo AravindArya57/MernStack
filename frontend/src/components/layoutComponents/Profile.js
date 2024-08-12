@@ -21,7 +21,7 @@ function Profile() {
               <Dropdown className='d-inline' >
                   <Dropdown.Toggle variant='default text-white pr-5' id='dropdown-basic'>
                     <figure className='avatar avatar-nav'>
-                      <Image width="50px" src={user.avatar??'./images/default_avatar.png'}  />
+                      <Image width="50px" src={user.avatar??'./images/default_avatar.png'} alt="profielImg" />
                     </figure>
                     <span className='text-dark'>{user.name}</span>
                   </Dropdown.Toggle>
