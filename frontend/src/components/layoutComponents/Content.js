@@ -56,7 +56,7 @@ function Content() {
                             <Card >
                                 <Card.Img variant="top" src={video.thumbnail}  className='cardimage'/>
                                 <Card.Body className='cardbody'>
-                                    <Card.Title>{video.title}<Badge bg="dark" className='badgecss'>{video.device}</Badge></Card.Title> 
+                                    <Card.Title>{video.title}<Badge bg="dark" className='badgecss'>{video.videoMode}</Badge></Card.Title> 
                                 
                                     <Card.Text className='customcardcss'>{video.description}</Card.Text>
                                     <Row>
