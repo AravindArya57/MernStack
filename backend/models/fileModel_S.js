@@ -23,8 +23,24 @@ const FileModel_S_Schema = new Schema({
     type: String,
     required: true
   },
+  videoFilePath: {
+    type : String,
+    required: true
+  }, // Original path to encrypted video file
+  videoOriginalName: {
+    type : String,
+    required: true
+  },
+  secretKey: {
+    type : String,
+    required: true
+  }, // Encryption key
+  iv: {
+    type : String,
+    required: true
+  }, // Initialization vector
   thumbnail: {
-    type: String,
+    type : String,
     required: true
   },
   uploadDate: {

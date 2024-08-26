@@ -18,7 +18,7 @@ const NewVideoFile = () => {
     const [thumbnailPreview, setThumbnailPreview] = useState("/images/default_avatar.png");
 
     const [video, setVideo] = useState(null);
-    const categories = ['360', '180', 'MR', 'Theater'];
+    const categories = ['360', '180', 'MR', 'Theatre'];
     const deviceCategories = ['Quest', 'Vision Pro'];
 
     const dispatch = useDispatch();

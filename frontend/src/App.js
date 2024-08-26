@@ -7,7 +7,7 @@ import Content from './components/layoutComponents/Content'
 
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
-// import { ToastContainer } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -49,7 +49,7 @@ function App() {
         <div className='grid-container'>
           <Header OpenSidebar={OpenSidebar}/>
           <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar}/>
-            {/* <ToastContainer theme='dark' /> */}
+
             <Routes>
               <Route path='/' element={<Login/>} />
               <Route path='/videos/device/:device' element={<VideoDetail/>} />
@@ -70,6 +70,7 @@ function App() {
               <Route path='/admin/users' element={ <ProtectedRoute isAdmin={true}><UserList/></ProtectedRoute> } />
               <Route path='/admin/user/:id' element={ <ProtectedRoute isAdmin={true}><UpdateUser/></ProtectedRoute> } />
             </Routes>
+            <ToastContainer theme='dark' />
         </div>
       </HelmetProvider>
     </Router>   
