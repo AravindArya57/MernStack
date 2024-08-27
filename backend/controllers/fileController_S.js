@@ -22,7 +22,6 @@ const encryptFile = async (filePath, secretKey, iv) => {
 const decryptFile = async (encryptedFilePath, secretKey, iv, decryptedFilePath) => {
   const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(secretKey), iv);
   const input = fs.createReadStream(encryptedFilePath);
-  // const decryptedFilePath = path.basename(encryptedFilePath, '.enc'); // Remove .enc extension
   const output = fs.createWriteStream(decryptedFilePath);
 
   input.pipe(decipher).pipe(output);
@@ -33,32 +32,14 @@ const decryptFile = async (encryptedFilePath, secretKey, iv, decryptedFilePath) 
   });
 }
 
-// Normalize file paths (synchronous)
-const normalizeFilePath = (filePath) => {
-  // Replace backslashes with forward slashes
-  let normalizedPath = filePath.replace(/\\/g, '/');
-  // Ensure the path starts with a single forward slash
-  if (!normalizedPath.startsWith('/')) {
-      normalizedPath = '/' + normalizedPath;
-  }
-  return normalizedPath;
-};
-
-const normalizeFilePathToDoubleBackslashes = (filePath) => {
-  // Replace forward slashes with double backslashes
-  let normalizedPathToDoubleBack = filePath.replace(/\//g, '\\');
-  // Ensure the path starts with a double backslash
-  return normalizedPathToDoubleBack;
-};
-
 // upload video content
 const uploadVideo = async (req, res) => {
   const { title, description, device, videoMode } = req.body;
 
   const videoFile = req.files['video'][0];
-  const thumbnailFile = req.files['thumbnail'][0]; //path.posix.join('/', ).replace(/\\/g, '/');  
-
-  const normalizedThumbnailPath = normalizeFilePath(thumbnailFile.path);
+  const thumbnailFile = req.files['thumbnail'][0];
+  
+  const modifiedThumbnailPath = path.posix.join('/', thumbnailFile.path).replace(/\\/g, '/');
 
   // Generate encryption key and IV for the video file
   const secretKey = crypto.randomBytes(32); // 32 bytes = 256 bits
@@ -85,7 +66,7 @@ const uploadVideo = async (req, res) => {
       videoOriginalName: videoFile.originalname,
       secretKey: secretKey.toString('hex'),
       iv: iv.toString('hex'),
-      thumbnail: normalizedThumbnailPath, // Store the thumbnail file path
+      thumbnail: modifiedThumbnailPath, // Store the thumbnail file path
   });
 
   try {
@@ -220,7 +201,7 @@ const updateVideo = async (req, res) => {
     if (req.files && req.files.thumbnail) 
     {
       const filePath = videoData.thumbnail;
-      const normalizedPathThumb = normalizeFilePathToDoubleBackslashes(filePath);
+      const normalizedPathThumb = filePath.replace(/\//g, '\\');
 
       const basePath  = path.resolve('');
       const oldThumbnailPath = path.join(basePath, normalizedPathThumb);
@@ -231,7 +212,7 @@ const updateVideo = async (req, res) => {
       }
       const thumbnailFile = req.files.thumbnail[0];
 
-      const normalizedThumbnailPath = normalizeFilePath(thumbnailFile.path);
+      const normalizedThumbnailPath = path.posix.join('/', thumbnailFile.path).replace(/\\/g, '/');
 
       // Save the new thumbnail file path
       videoData.thumbnail = normalizedThumbnailPath;
@@ -263,7 +244,7 @@ const deleteVideo = async (req, res) => {
     const videoEncFilePath = path.resolve(__dirname, '..', '..', videoData.videoFilePath);
 
     const filePath = videoData.thumbnail;
-    const normalizedPathThumb = normalizeFilePathToDoubleBackslashes(filePath);
+    const normalizedPathThumb = filePath.replace(/\//g, '\\');
 
     const basePath  = path.resolve('');
     const thumbnailFilePath = path.join(basePath, normalizedPathThumb);
@@ -316,4 +297,3 @@ const deleteDecryptedVideo = async (req, res) => {
 module.exports = {
   uploadVideo, getAllVideos , getVideo, getVideoByDevice, updateVideo, deleteVideo, decryptFiles, deleteDecryptedVideo
 }
-
