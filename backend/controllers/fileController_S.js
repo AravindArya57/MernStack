@@ -32,14 +32,34 @@ const decryptFile = async (encryptedFilePath, secretKey, iv, decryptedFilePath) 
   });
 }
 
+const normalizeFilePath = (filePath) => {
+
+  // Determine the platform
+  const isWindows = os.platform() === 'win32';
+
+  // Normalize the path based on the platform
+  let normalizedPath = path.posix.join('/', filePath);
+
+  // On Windows, convert forward slashes to backslashes
+  if (isWindows) {
+      normalizedPath = normalizedPath.replace(/\//g, '\\');
+  } else {
+      // On Linux, ensure it uses forward slashes
+      normalizedPath = normalizedPath.replace(/\\/g, '/');
+  }
+
+  return normalizedPath;
+
+};
+
 // upload video content
 const uploadVideo = async (req, res) => {
   const { title, description, device, videoMode } = req.body;
 
   const videoFile = req.files['video'][0];
   const thumbnailFile = req.files['thumbnail'][0];
-  
-  const modifiedThumbnailPath = path.posix.join('/', thumbnailFile.path).replace(/\\/g, '/');
+
+  const modifiedThumbnailPath = normalizeFilePath(thumbnailFile.path);
 
   // Generate encryption key and IV for the video file
   const secretKey = crypto.randomBytes(32); // 32 bytes = 256 bits
@@ -77,7 +97,7 @@ const uploadVideo = async (req, res) => {
   }
 };
 
-// decrypted video function 
+// decrypted video function
 const decryptFiles = async (req, res) => {
   try {
       const fileRecord = await FileModel_S.findById(req.params.id);
@@ -91,7 +111,7 @@ const decryptFiles = async (req, res) => {
 
       // Define the decrypted file path
       const decryptedDir = path.join('uploads', 'videos', 'decrypted');
-        
+
       // Ensure the decrypted directory exists
       if (!fs.existsSync(decryptedDir)) {
           fs.mkdirSync(decryptedDir, { recursive: true });
@@ -105,7 +125,8 @@ const decryptFiles = async (req, res) => {
 
       const decryptedFilePathToBackShlash = path.posix.join('/', decryptedFilePath).replace(/\\/g, '/');
 
-      res.json({ decryptedFilePathToBackShlash });
+      res.redirect(decryptedFilePathToBackShlash);
+    //  res.json({ decryptedFilePathToBackShlash });
 
   } catch (err) {
       console.error(err);
@@ -167,7 +188,7 @@ const updateVideo = async (req, res) => {
     videoData.device = device || videoData.device;
     videoData.videoMode = videoMode || videoData.videoMode;
 
-     if (req.files && req.files.video) 
+     if (req.files && req.files.video)
       {
       // Delete the old video file
       const oldVideoPath = path.resolve(__dirname, '..', '..', videoData.videoFilePath);
@@ -180,11 +201,11 @@ const updateVideo = async (req, res) => {
       // Generate encryption key and IV for the video file
       const secretKey = crypto.randomBytes(32); // 32 bytes = 256 bits
       const iv = crypto.randomBytes(16); // 16 bytes for AES
-    
+
       // Encrypt the video file
       const encryptedFilePath = await encryptFile(videoFile.path, secretKey, iv);
       // Encrypt the video file
-    
+
       // Delete the original .mp4 file
       fs.unlink(videoFile.path, (err) => {
         if (err) {
@@ -197,14 +218,11 @@ const updateVideo = async (req, res) => {
       videoData.secretKey = secretKey.toString('hex');
       videoData.iv = iv.toString('hex');
     }
-
-    if (req.files && req.files.thumbnail) 
+   if (req.files && req.files.thumbnail)
     {
       const filePath = videoData.thumbnail;
-      const normalizedPathThumb = filePath.replace(/\//g, '\\');
-
       const basePath  = path.resolve('');
-      const oldThumbnailPath = path.join(basePath, normalizedPathThumb);
+      const oldThumbnailPath = path.join(basePath, filePath);
 
       // Delete the old thumbnail file
       if (fs.existsSync(oldThumbnailPath)) {
@@ -212,7 +230,7 @@ const updateVideo = async (req, res) => {
       }
       const thumbnailFile = req.files.thumbnail[0];
 
-      const normalizedThumbnailPath = path.posix.join('/', thumbnailFile.path).replace(/\\/g, '/');
+      const normalizedThumbnailPath = normalizeFilePath(thumbnailFile.path);
 
       // Save the new thumbnail file path
       videoData.thumbnail = normalizedThumbnailPath;
@@ -229,7 +247,6 @@ const updateVideo = async (req, res) => {
   }
 };
 
-
 // Delete video function
 const deleteVideo = async (req, res) => {
   try {
@@ -243,11 +260,9 @@ const deleteVideo = async (req, res) => {
     // Construct the absolute paths
     const videoEncFilePath = path.resolve(__dirname, '..', '..', videoData.videoFilePath);
 
-    const filePath = videoData.thumbnail;
-    const normalizedPathThumb = filePath.replace(/\//g, '\\');
-
+    const thumbnailFilePathDir = videoData.thumbnail;
     const basePath  = path.resolve('');
-    const thumbnailFilePath = path.join(basePath, normalizedPathThumb);
+    const thumbnailFilePath = path.join(basePath, thumbnailFilePathDir);
 
     // Check if files exist before attempting to delete
     if (fs.existsSync(videoEncFilePath)) {
@@ -270,6 +285,7 @@ const deleteVideo = async (req, res) => {
   }
 };
 
+
 // Delete video function
 const deleteDecryptedVideo = async (req, res) => {
   try {
@@ -280,7 +296,7 @@ const deleteDecryptedVideo = async (req, res) => {
     const videoDecryptPath = path.resolve(__dirname, '..', '..', VideoUrlPath);
 
     // Check if files exist before attempting to delete
-    if (fs.existsSync(videoDecryptPath)) 
+    if (fs.existsSync(videoDecryptPath))
     {
         fs.unlinkSync(videoDecryptPath);
         res.status(200).json({ success: true, message: 'Video deleted successfully' });
